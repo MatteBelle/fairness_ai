@@ -73,7 +73,6 @@ class FairnessMetrics():
             n_iter: iteration of this training loop.
         """
         auc = self.calc_auc(pred, targets)
-
         self.auc[n_iter].append(auc)
         self.logging_dict["auc"] = auc
         return auc
@@ -91,8 +90,6 @@ class FairnessMetrics():
             n_iter: iteration of this training loop.
         """
         aucs = []
-        print(pred)
-        print(targets)
         for group in dataset.subgroup_indexes:
             # get len of targets
             targets_len = len(targets)
@@ -105,7 +102,11 @@ class FairnessMetrics():
         auc_min = min(aucs)
         auc_max = max(aucs)
         auc_macro = np.mean(aucs)
+        # change subgroup_minority to integer scalar array
+        #print("AUC types: ", aucs)
+        aucs = np.array(aucs)
         auc_minority = aucs[dataset.subgroup_minority]
+        #print("AUC minority: ", auc_minority)
         
         self.auc_min[n_iter].append(auc_min)
         self.auc_max[n_iter].append(auc_max)
@@ -143,6 +144,8 @@ class FairnessMetrics():
             targets: target varialbles (Torch tensor).
             n_iter: iteration of this training loop.            
         """
+        #print("pred: ", pred)
+        #print("targets: ", targets)
         tn, fp, fn, tp = confusion_matrix(targets.cpu().detach().numpy(), pred.cpu().detach().numpy()).ravel()
         self.posnegs[n_iter] = np.array([tn, fp, fn, tp])
         

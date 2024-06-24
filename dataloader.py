@@ -95,13 +95,15 @@ class loadDataset(data.Dataset):
         self.dataframe[self.target_column_name] = self.dataframe[
             self.target_column_name
         ].astype("category")
+        #print("target column name", self.target_column_name)
+        #print("target column", self.dataframe[self.target_column_name])
         self.dataframe[self.target_column_name] = (
             self.dataframe[self.target_column_name] 
             == self.target_column_positive_value) * 1
         self.target_data = torch.Tensor(
             self.dataframe[self.target_column_name].values
         )
-        print("target data values", self.target_data.unique().numpy())
+        #print("target data values", self.target_data.unique().numpy())
 
         # Binarize protected features. 
         for sensitive_column_name, sensitive_column_value in zip(
@@ -161,8 +163,8 @@ class loadDataset(data.Dataset):
             for c in self.subgroups.columns]
         #print(subgroup_counts)
         #print(np.argmin(subgroup_counts, axis=0))
-        self.subgroup_minority = np.argmin(subgroup_counts, axis=0)
-        #print(self.subgroup_minority)
+        self.subgroup_minority = np.argmin(subgroup_counts)
+        #print("Minority subgroup: ", self.subgroup_minority)
 
         # Get the indexes of the dataframe rows that correspond to each subgroup.
         subgroup_indexes = []
@@ -265,12 +267,8 @@ def get_dataset_stats(dataset, train_or_test):
 
     # Read the dataframe.
     dataframe = pd.read_csv(
-        data_path + train_or_test + "_processed" + ".csv", header=None, low_memory=False
+        data_path + train_or_test + ".csv", header=None, low_memory=False
     )
-
-    if(dataset == "students-dataset"):
-        #remove the first row
-        dataframe = dataframe[1:]
 
     # Read json file to determine which columns of data to use.
     with open(data_path + "dataset_stats.json") as f:
@@ -326,6 +324,7 @@ class TensorBoardLogger(object):
             # Plot to TensorBoard every avg_window steps
             if self.steps[key] >= self.avg_window:
                 avg_val = self.value_dict[key] / self.steps[key]
+                #print(key, avg_val)
                 self.summary_writer.add_scalar(
                     self.name + key, avg_val, global_step=self.global_step
                 )
